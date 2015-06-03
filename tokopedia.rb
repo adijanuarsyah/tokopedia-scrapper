@@ -4,24 +4,44 @@ require "rubygems"
 require "highline/import"
 
   ft = HighLine::ColorScheme.new do |cs|
-    cs[:item] = [ :bold, :white, ]
-    cs[:price] = [ :bold, :magenta,]
+    cs[:colorcat] = [ :bold, :magenta,]
   end
-
   HighLine.color_scheme = ft
 
-  items = Array.new
-  prices = Array.new
+  say("\nTokopedia Scrapper Tools v1.0")
+  say("Please choose menu : \n")
 
-  1.upto(7) do |page_num|
-    doc = Nokogiri::HTML(open("https://www.tokopedia.com/p/handphone-tablet?page=#{page_num}"))
-    items = doc.xpath("//div[contains(@class,'name')]/b").collect {|node| node.text.strip}
-    prices = doc.xpath("//div[contains(@class,'product')]//span[contains(@class,'price')]").collect {|node| node.text.strip}
-    prices.delete("")
+  loop do 
+  choose do |menu| 
+    menu.index = :letter
+    menu.index_suffix = ") "
 
-    items.zip(prices).each do |title,price|
-      say("<%= color(%q(#{title}), :item) %> ")
-      say("<%= color(%q(#{price}), :price)%> ")
-      say("\n")
+
+    menu.choice :category do 
+    categories = Array.new
+    doc = Nokogiri::HTML(open("https://www.tokopedia.com/"))
+    categories = doc.xpath("//option[contains(@class,'ml-10')]").collect {|node| node.text.strip}
+
+      categories.each do |category|
+        puts category+" "
+      end
+
+    say("<%= color('Please insert name of product', :colorcat) %>")
+    
+    end
+
+      menu.choice :hotlist do 
+        doc = Nokogiri::HTML(open("https://www.tokopedia.com/hot"))
+        hotlist = Array.new
+        hotlist_price = Array.new
+        hotlist = doc.xpath("//div[contains(@class,'mt-5 fs-12 ellipsis')]").collect {|node| node.text.strip}
+        hotlist_price = doc.xpath("//div[contains(@id,'hot-product-list')]//span").collect { |node| node.text.strip}
+
+        hotlist.zip(hotlist_price).each do |name,price|
+            puts name+" "+price
+        end
+      end
+      menu.choice(:quit, "Exit Tools ") { exit }
+      say("\nThank you using this tools")
     end
   end
